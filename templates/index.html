@@ -1,4 +1,3 @@
-%%writefile templates/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,6 @@
       margin: 0;
       font-family: "Segoe UI", Arial, sans-serif;
       height: 100vh;
-
       background: linear-gradient(
           rgba(0,0,0,0.55),
           rgba(0,0,0,0.55)
@@ -23,7 +21,6 @@
       color: #fff;
     }
 
-    /* ?? RUNNING TEXT */
     .marquee {
       position: fixed;
       top: 0;
@@ -53,7 +50,7 @@
       display: flex;
       gap: 30px;
       align-items: center;
-      margin-top: 60px; /* marquee space */
+      margin-top: 60px;
     }
 
     .emoji-panel {
@@ -64,18 +61,12 @@
     }
 
     .camera-card {
-      position: relative;
       padding: 20px;
       border-radius: 18px;
       background: rgba(255,255,255,0.12);
       backdrop-filter: blur(12px);
       box-shadow: 0 15px 40px rgba(0,0,0,0.4);
       text-align: center;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      font-weight: 500;
     }
 
     #container {
@@ -110,55 +101,46 @@
       padding: 18px;
       box-shadow: 0 15px 35px rgba(0,0,0,0.4);
     }
-
-    .emotion-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 15px;
-    }
-
-    .info-panel:not(:first-of-type) {
-      display: none !important;
-    }
   </style>
 </head>
 
 <body>
 
-  <!-- ?? RUNNING HEADING -->
   <div class="marquee">
-    <span>Welcome to AFNANKHAN�s Web App � We�re Glad to Have You Here � Welcome to AFNANKHAN�s Web App � We�re Glad to Have You Here </span>
+    <span>
+      Welcome to AFNANKHAN’s Web App — We’re Glad to Have You Here •
+      Welcome to AFNANKHAN’s Web App — We’re Glad to Have You Here
+    </span>
   </div>
 
   <div class="app">
 
     <div class="emoji-panel">
-      ??
-      ??
-      ??
-      ??
-      ??
+      😀
+      😐
+      😢
+      😠
+      😮
     </div>
 
     <div class="camera-card">
-      <h2>Bring your face inside ? the circle</h2>
+      <h2>Bring your face inside the circle</h2>
 
       <div id="container">
         <video id="video" width="400" height="300" autoplay></video>
         <canvas id="overlay" width="400" height="300"></canvas>
       </div>
 
-      <div id="result">Camera ready�</div>
+      <div id="result">Camera ready…</div>
     </div>
 
     <div class="info-panel">
       <h3>Emotion Probability</h3>
-      <div class="emotion-row"><span>Happy</span><span>--%</span></div>
-      <div class="emotion-row"><span>Surprise</span><span>--%</span></div>
-      <div class="emotion-row"><span>Neutral</span><span>--%</span></div>
-      <div class="emotion-row"><span>Sad</span><span>--%</span></div>
-      <div class="emotion-row"><span>Angry</span><span>--%</span></div>
+      <div>Happy — --%</div>
+      <div>Surprise — --%</div>
+      <div>Neutral — --%</div>
+      <div>Sad — --%</div>
+      <div>Angry — --%</div>
     </div>
 
   </div>
@@ -205,7 +187,7 @@
              Confidence: ${data.confidence.toFixed(2)}%`;
         } else {
           resultDiv.innerHTML =
-            `<span style="color:#ffcc00">The face is not being detected properly</span>`;
+            `<span style="color:#ffcc00">Face not detected properly</span>`;
         }
       })
       .catch(() => {
