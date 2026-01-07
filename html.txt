@@ -1,0 +1,221 @@
+%%writefile templates/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emotion Detection</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      height: 100vh;
+
+      background: linear-gradient(
+          rgba(0,0,0,0.55),
+          rgba(0,0,0,0.55)
+        ),
+        url("/static/web_background.png") center / cover no-repeat;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    /* ?? RUNNING TEXT */
+    .marquee {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      overflow: hidden;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .marquee span {
+      display: inline-block;
+      white-space: nowrap;
+      font-size: 20px;
+      font-weight: 500;
+      color: #00ff99;
+      animation: scroll 15s linear infinite;
+    }
+
+    @keyframes scroll {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+
+    .app {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      margin-top: 60px; /* marquee space */
+    }
+
+    .emoji-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      font-size: 34px;
+    }
+
+    .camera-card {
+      position: relative;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    #container {
+      position: relative;
+      display: inline-block;
+    }
+
+    video {
+      border-radius: 12px;
+    }
+
+    canvas {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      background: transparent;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: 500;
+      min-height: 24px;
+    }
+
+    .info-panel {
+      min-width: 220px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+
+    .emotion-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .info-panel:not(:first-of-type) {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ?? RUNNING HEADING -->
+  <div class="marquee">
+    <span>Welcome to AFNANKHAN’s Web App — We’re Glad to Have You Here • Welcome to AFNANKHAN’s Web App — We’re Glad to Have You Here </span>
+  </div>
+
+  <div class="app">
+
+    <div class="emoji-panel">
+      ??
+      ??
+      ??
+      ??
+      ??
+    </div>
+
+    <div class="camera-card">
+      <h2>Bring your face inside ? the circle</h2>
+
+      <div id="container">
+        <video id="video" width="400" height="300" autoplay></video>
+        <canvas id="overlay" width="400" height="300"></canvas>
+      </div>
+
+      <div id="result">Camera ready…</div>
+    </div>
+
+    <div class="info-panel">
+      <h3>Emotion Probability</h3>
+      <div class="emotion-row"><span>Happy</span><span>--%</span></div>
+      <div class="emotion-row"><span>Surprise</span><span>--%</span></div>
+      <div class="emotion-row"><span>Neutral</span><span>--%</span></div>
+      <div class="emotion-row"><span>Sad</span><span>--%</span></div>
+      <div class="emotion-row"><span>Angry</span><span>--%</span></div>
+    </div>
+
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("overlay");
+    const ctx = canvas.getContext("2d");
+    const resultDiv = document.getElementById("result");
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream)
+      .catch(() => resultDiv.innerText = "Camera access allow karo");
+
+    function drawCircle() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, 100, 0, 2 * Math.PI);
+      ctx.strokeStyle = "lime";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    setInterval(drawCircle, 30);
+
+    function captureAndPredict() {
+      if (video.videoWidth === 0) return;
+
+      const temp = document.createElement("canvas");
+      temp.width = video.videoWidth;
+      temp.height = video.videoHeight;
+      temp.getContext("2d").drawImage(video, 0, 0);
+
+      fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: temp.toDataURL("image/jpeg") })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "ok") {
+          resultDiv.innerHTML =
+            `Emotion: <b>${data.emotion.toUpperCase()}</b><br>
+             Confidence: ${data.confidence.toFixed(2)}%`;
+        } else {
+          resultDiv.innerHTML =
+            `<span style="color:#ffcc00">The face is not being detected properly</span>`;
+        }
+      })
+      .catch(() => {
+        resultDiv.innerHTML =
+          `<span style="color:#ff6666">Server error</span>`;
+      });
+    }
+
+    setInterval(captureAndPredict, 2000);
+  </script>
+
+</body>
+</html>
